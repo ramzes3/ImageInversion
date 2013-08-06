@@ -287,7 +287,9 @@ double MData::find_max(double* input_array){
     double max = input_array[0];
     int size = size_x*size_y;
     for (int i = 0; i<size; i++){
-        if(max < input_array[i]) max = input_array[i];
+        if(max < input_array[i]){
+            max = input_array[i];
+        }
     }
     return max;
 }
