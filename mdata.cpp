@@ -744,9 +744,10 @@ bool MData::SavePES(char* filein)
     string combined_str = changeExtension(filein, "_pes.dat" );
     ofstream outFile1(combined_str.c_str(), ios::out);
     if(!outFile1){ return 0; }
-    outFile1 << 0 << "\t" << array_1D_spectrum[0] << endl;
+    outFile1 << "px\t" << "I\t" << "px^2\t" << "I/px" << endl;
+    outFile1 << 0 << "\t" << array_1D_spectrum[0] << "\t0\t" <<  "0" << endl;
     for(int i=1; i<size_spectrum; i++){
-        outFile1 << i << "\t" << array_1D_spectrum[i] << endl;
+        outFile1 << i << "\t" << array_1D_spectrum[i] << "\t" << i*i << "\t" << array_1D_spectrum[i]/(float) i << endl;
     }
     outFile1.close();
     return 1;
