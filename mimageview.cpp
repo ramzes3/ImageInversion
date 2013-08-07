@@ -97,8 +97,12 @@ void MImageView::DrawArray(double* array, int size_x, int size_y, double max_val
             array_view[j + i*size_x] = array[j + i*size_x];
 
             intensity = (int)( (255.0 * array_view[j + i*size_x]) / m_value);
-            if ( intensity > 255.0 || intensity < 0.0) value = qRgb(189, 149, 39);
-            else {value = newmap.value[intensity];}
+            if (intensity > 255 || intensity < 0){
+                value = qRgb(189, 149, 39);
+            }
+            else {
+                value = newmap.value[intensity];
+            }
 
             m_image->setPixel( QPoint(j,i), value );
         }
@@ -288,12 +292,12 @@ void MImageView::resizeEvent(QResizeEvent *event)
 }
 
 
-void MImageView::load_color_map(char* filename, colormap* var)
-{
+void MImageView::load_color_map(char* filename, colormap* var){
     FILE* pFile; pFile = NULL;
     char buffer, str[255];
     pFile = fopen (filename , "r");
     if (pFile == 0) {return;}
+
     buffer = fscanf(pFile, "%s", str);
     strcpy(var->title, str);
     int col1, col2, col3;
@@ -304,6 +308,7 @@ void MImageView::load_color_map(char* filename, colormap* var)
         buffer = fscanf(pFile, "%d", &col2);
         buffer = getc(pFile); buffer = getc(pFile);
         buffer = fscanf(pFile, "%d", &col3);
+
         var->red[i] = col1; var->green[i] = col2; var->blue[i] = col3;
         var->value[i] = qRgb(col1, col2, col3);
         buffer = getc(pFile);
