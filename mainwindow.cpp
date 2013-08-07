@@ -475,7 +475,7 @@ void MainWindow::Analise()
         image_window->update();
         image_window->show();
 
-        /*
+        /* Ciaran modifications
         sprintf(filename,"%s/%s/inversion", work_dir_c, dirname, file_template); // inversion folder path string
         mkdir(filename);
         sprintf(filename,"%s/%s/inversion/x%iy%i", work_dir_c, dirname, xc, yc); //output folder name
