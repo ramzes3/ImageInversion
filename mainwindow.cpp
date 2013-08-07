@@ -22,6 +22,7 @@ using namespace std;
 //#include "cobolddata.h"
 #include "mspectrum.h"
 #include "multifileinversion.h"
+#include <direct.h>
 
 #include "options.h"
 
@@ -155,7 +156,6 @@ void MainWindow::Load_Image_ASCII()
     double counts = mdata1->TotalCounts(mdata1->array_2D_initial, mdata1->GetsizeX()/2, mdata1->GetsizeY()/2, mdata1->GetsizeY());
     sprintf (buffer, "Array size: %d, %d; Counts: %4.0f", mdata1->GetsizeX(), mdata1->GetsizeY(), counts );
     message( buffer );
-
     image_window->DrawArray( mdata1->array_2D_initial, mdata1->size_x, mdata1->size_y, max_content );
     image_window->update();   
     image_window->show();
@@ -407,6 +407,7 @@ void MainWindow::Analise()
 {
     int xc = ui->spinBox_xc->value();
     int yc = ui->spinBox_yc->value();
+
     //int dr = ui->spinBox_dr->value();
 //// Get working directory  ////////
     QString work_dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
@@ -439,6 +440,13 @@ void MainWindow::Analise()
     ui->progressBar->setValue(0);
     ui->progressBar->setVisible(1);
     int file_start, file_stop; file_start=0; file_stop = dir_list.size();
+
+    // get quarter
+    int quarter;
+    quarter = QInputDialog::getInt(this, tr("QInputDialog::getText()"),
+                                         tr("Which quarter to use?"), 0, 0, 4, 1, &ok);
+    printf("Quarter: %i\n", quarter);
+
     for(int k = file_start; k < file_stop; k++){ // main loop
 
         ui->progressBar->setValue(100*(k-file_start + 1)/(file_stop-file_start + 1));
@@ -446,15 +454,14 @@ void MainWindow::Analise()
         QByteArray var = dir_list.at(k).toLatin1();// dir.toLatin1(); //  convertion from QString to char*
         sprintf(dirname,"%s",var.data()); // get path location
 
-        sprintf(filename,"%s/%s/%s", work_dir_c, dirname, file_template);
+        sprintf(filename,"%s/%s/%s", work_dir_c, dirname, file_template); // file to open
 
         if (!mdata1->Load_2D(filename,transpose_flag)) {message("cannot open file for reading"); continue;}
         //mdata1->normalise_2darray(mdata1->array_2D_initial);
         // select quarter
         if(mdata1->bkg_flag && subtractbkg_flag) mdata1->Subtract_bkg();
 
-        switch (n_quadrant)
-        {
+        switch (quarter){
         case 1: mdata1->Get_quarter1(xc, yc);
             break;
         case 2: mdata1->Get_quarter2(xc, yc);
@@ -466,23 +473,29 @@ void MainWindow::Analise()
         default: mdata1->Symmetrise(xc, yc);
             break;
         }
-
         double max_content = mdata1->find_max(mdata1->array_2D_initial);
 
         image_window->DrawArray( mdata1->array_2D_initial, mdata1->size_x, mdata1->size_y, max_content);
         image_window->update();
         image_window->show();
 
+        sprintf(filename,"%s/%s/inversion", work_dir_c, dirname, file_template); // inversion folder path string
+        mkdir(filename);
+        sprintf(filename,"%s/%s/inversion/x%iy%i", work_dir_c, dirname, xc, yc); //output folder name
+        mkdir(filename);
+
+        switch (quarter){
+        case 0:
+            sprintf(filename,"%s/%s/inversion/x%iy%i/whole", work_dir_c, dirname, xc, yc); //output folder
+            break;
+        default:
+            sprintf(filename,"%s/%s/inversion/x%iy%i/q%i", work_dir_c, dirname, xc, yc, quarter); //output folder
+            break;
+        }
+
         sprintf(bufferc, "%s_orig", filename);
         SaveImage(bufferc);
-
-
         InvertImage();
-
-        //sprintf(bufferc, "%s_inv", filename);
-        //SaveImage(bufferc);
-
-        //mdata1->copy_pes(invers->ang);
 
         if(!mdata1->SavePES(filename)) {message("there is no spectrum"); }
         if(!mdata1->SaveAng(filename)) {message("there is no angular distribution"); }
