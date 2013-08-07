@@ -1,4 +1,4 @@
 ImageInversion
 ==============
 
-Inverse Abel transform for VMI imaeg processing
+Inverse Abel transform for VMI image processing
