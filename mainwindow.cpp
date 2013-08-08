@@ -23,6 +23,8 @@ using namespace std;
 #include "mspectrum.h"
 #include "multifileinversion.h"
 
+#include <direct.h>
+
 #include "options.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -473,16 +475,28 @@ void MainWindow::Analise()
         image_window->update();
         image_window->show();
 
+        // Ciaran modifications
+        sprintf(filename,"%s/%s/inversion", work_dir_c, dirname, file_template); // inversion folder path string
+        mkdir(filename);
+        sprintf(filename,"%s/%s/inversion/x%iy%i", work_dir_c, dirname, xc, yc); //output folder name
+        mkdir(filename);
+
+        switch (n_quadrant){
+            case 0:
+                sprintf(filename,"%s/%s/inversion/x%iy%i/whole", work_dir_c, dirname, xc, yc); //output folder
+                break;
+            default:
+                sprintf(filename,"%s/%s/inversion/x%iy%i/q%i", work_dir_c, dirname, xc, yc, n_quadrant); //output folder
+                break;
+        }
+        //
+
         sprintf(bufferc, "%s_orig", filename);
         SaveImage(bufferc);
 
 
         InvertImage();
 
-        //sprintf(bufferc, "%s_inv", filename);
-        //SaveImage(bufferc);
-
-        //mdata1->copy_pes(invers->ang);
 
         if(!mdata1->SavePES(filename)) {message("there is no spectrum"); }
         if(!mdata1->SaveAng(filename)) {message("there is no angular distribution"); }
@@ -1308,9 +1322,8 @@ void MainWindow::OptionDialog()
         subtractbkg_flag = other_flags[1];
         lthickness = mbasis[9];
         //for(int i=0;i<4;i++) saving_flags[i] = mbasis[7+i];
+        if(image_window){image_window->set_circle_par(lthickness, color1);}
     }
-
-    if(image_window){image_window->set_circle_par(lthickness, color1);}
     else message("settings cancelled");
 }
 

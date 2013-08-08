@@ -17,11 +17,11 @@ Options::Options(QWidget *parent, int *par, bool *saving_flags, bool *flags2, QC
 
     switch (par[6])
     {
-    case 1: ui->radioButton_ASCII->setEnabled(1);
+    case 1: ui->radioButton_ASCII->setChecked(1);
         break;
-    case 2: ui->radioButton_binary->setEnabled(1);
+    case 2: ui->radioButton_binary->setChecked(1);
         break;
-    default: ui->radioButton_ASCII->setEnabled(1);
+    default: ui->radioButton_ASCII->setChecked(1);
         break;
     }
 
@@ -56,7 +56,7 @@ Options::~Options()
     ovar[4] = ui->spinBox_width->value();
     ovar[5] = ui->spinBox_height->value();
 
-    if (ui->radioButton_ASCII->isEnabled()){ ovar[6]=1;}
+    if (ui->radioButton_ASCII->isChecked()){ ovar[6]=1;}
     else {ovar[6]=2;}
     ovar[7] = ui->spinBox_quadrant->value();
     ovar[8] = ui->spinBox_skiplines->value();

@@ -29,7 +29,7 @@ void MultiFileInversion::run() { //Q_DECL_OVERRIDE {
     QFileInfo info1(files.at(0));
     QByteArray var1 = info1.absolutePath().toLatin1();
     sprintf(work_dir_c,"%s", var1.data());
-    sprintf(fileout,"%s/test.%s", work_dir_c, "txt");
+    sprintf(fileout,"%s/TotalCounts.%s", work_dir_c, "txt");
     ofstream outFile1(fileout, ios::out);
     if(!outFile1){ return; }
 
@@ -60,7 +60,7 @@ void MultiFileInversion::run() { //Q_DECL_OVERRIDE {
             error = mdata1->Load_2D(filename, mdata1->t_flag);
             break;
         case 2:
-            error = mdata1->Load_binary(filename, mdata1->size_x, mdata1->size_y, mdata1->binary_depth, mdata1->t_flag);
+            error = mdata1->Load_binary(filename, mdata1->binary_depth, mdata1->size_x, mdata1->size_y, mdata1->t_flag);
             break;
         default:
             break;
@@ -72,7 +72,10 @@ void MultiFileInversion::run() { //Q_DECL_OVERRIDE {
             continue;
         }
 
-        if(mdata1->bkg_flag && subtractbkg_flag) mdata1->Subtract_bkg();
+        if(mdata1->bkg_flag && subtractbkg_flag) {
+            mdata1->Subtract_bkg();
+            mdata1->Copy_2D_ini_to_processed();
+        }
 
         switch (n_quadrant)
         {
@@ -88,7 +91,7 @@ void MultiFileInversion::run() { //Q_DECL_OVERRIDE {
             break;
         }        
 
-        outFile1 << filename << "\t Total counts: \t" << mdata1->TotalCounts(mdata1->array_2D_initial, invers1->xc_v, invers1->yc_v, invers1->dr_v)<<endl;
+        outFile1 << filename << "\t Total counts: \t" << mdata1->TotalCounts(mdata1->array_2D_initial, invers1->xc_v, invers1->yc_v, 2*invers1->dr_v)<<endl;
 
         invertImages();
 

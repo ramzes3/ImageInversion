@@ -126,7 +126,7 @@ int MData::Load_2D(char* filename, bool transpose_flag)
     array_2D_processed = new double [size_x*size_y];
     for(int i=0; i<size_x*size_y; i++){ array_2D_initial[i] = 0; array_2D_processed[i] = 0;} //array_2D_processed[i] = 0;
 
-    const double bkglevel = 0;    
+    const double bkglevel = 0;
     for (int i=0;i<size_y;i++){
        for (int j=0;j<size_x;j++){
            fscanf(pFile, "%f", &var);
@@ -410,10 +410,14 @@ void MData::CartToPolar(int x_c, int y_c, int r_dim, int phi_dim)
 
 void MData::declare_matrices()
 {
-    if(input_2d_array) for(int i=0;i<size_y;i++) delete [] input_2d_array[i];
-    if(output_2d_array) for(int i=0;i<size_y;i++) delete [] output_2d_array[i];
-    delete [] input_2d_array;
-    delete [] output_2d_array;
+    if(input_2d_array) {
+            for(int i=0;i<size_y;i++) delete [] input_2d_array[i];
+            delete [] input_2d_array;
+    }
+    if(output_2d_array) {
+            for(int i=0;i<size_y;i++) delete [] output_2d_array[i];
+            delete [] output_2d_array;
+    }
 
     input_2d_array = new double *[size_y];
     for(int i=0;i<size_y;i++) input_2d_array[i] = new double [size_x];
@@ -505,6 +509,7 @@ void MData::Subtract_bkg()
     for (int i=0;i<size_y;i++){
        for (int j=0;j<size_x;j++){
            array_2D_initial[j + i*size_x] = array_2D_initial[j + i*size_x] - array_2D_bkg[j + i*size_x];
+           //array_2D_processed[j + i*size_x] = array_2D_initial[j + i*size_x];
        }
     }
 }
@@ -755,7 +760,7 @@ bool MData::SaveAng(char* filein)
     if(!array_coeffs) {return 0;}
     //char fileout[255];
     //sprintf(fileout,"%s.%s", filein, "ang");
-    string combined_str = changeExtension(filein, "_proc.dat" );
+    string combined_str = changeExtension(filein, "_ang.dat" );
     ofstream outFile1(combined_str.c_str(), ios::out);
     if(!outFile1){ return 0; }
 
