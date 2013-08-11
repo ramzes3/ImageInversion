@@ -43,6 +43,7 @@ public slots:
         void AnaliseSelected(); // automatic analisys of selected files
         void Transpose();      // transpose image
         void SaveAll();         // save the result of image inversion from mdata1 class
+        void SaveSelected(); // Saves selected files, chosen from settings menu
         void SaveImage();      // asking to choose file name then uses function void SaveImage(char*);
         void SaveImage(char*);      // saving image as jpg file from image_window
         void SaveSettings();    // saving imortant parameters in the settings file
@@ -91,7 +92,7 @@ private:
     int               nL, n_r, n_phi, n_basisf;  // dimensions of the pBasex
     int               bit_depth, binary_width, binary_height; // seetings for loading binary file
     int               Lfile_type, n_quadrant;
-    bool              saving_flags[5], transpose_flag, subtractbkg_flag;
+    bool              saving_flags[9], transpose_flag, subtractbkg_flag;
     QColor            color1;
     int               lthickness;
 
