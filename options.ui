@@ -48,7 +48,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -124,8 +124,8 @@
     <widget class="QSpinBox" name="spinBox_Rbasis">
      <property name="geometry">
       <rect>
-       <x>210</x>
-       <y>120</y>
+       <x>90</x>
+       <y>180</y>
        <width>71</width>
        <height>27</height>
       </rect>
@@ -162,8 +162,8 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>210</x>
-       <y>90</y>
+       <x>10</x>
+       <y>180</y>
        <width>81</width>
        <height>27</height>
       </rect>
@@ -192,6 +192,58 @@
      </property>
      <property name="frame">
       <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_savePES">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>130</y>
+       <width>71</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Save PES</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_saveANG">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>150</y>
+       <width>71</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Save ANG</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_savePROC">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>170</y>
+       <width>71</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Save PROC</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_saveINV">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>190</y>
+       <width>71</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Save INV</string>
      </property>
     </widget>
    </widget>

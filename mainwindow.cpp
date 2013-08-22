@@ -65,7 +65,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     bit_depth = 31; binary_width = 1024; binary_height = 1024; // seetings for loading binary file
     Lfile_type = 0; n_quadrant = 0;
+
     for(int i=0;i<5;i++) saving_flags[i]=0;
+    saving_flags[5] = true; saving_flags[6] = true; saving_flags[7] = true; saving_flags[8] = true; // save all files by default
     LoadSettings(); // Load all the initial values from the file if file exists; !!!
 
 
@@ -80,6 +82,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //connect( ui->actionLMF, SIGNAL( triggered() ), this, SLOT( Load_Image_LMF() ) );
     connect( ui->actionAll, SIGNAL( triggered() ), this, SLOT( SaveAll() ) );
+    connect( ui->actionSelected, SIGNAL( triggered() ), this, SLOT( SaveSelected() ) );
     connect( ui->actionImage, SIGNAL( triggered() ), this, SLOT( SaveImage() ) );
 
 
@@ -605,6 +608,38 @@ void MainWindow::SaveAll(){
     if(!mdata1->SaveAng(filesave)) {message("there is no angular distribution"); }
     if(!mdata1->SaveInvMatrix(filesave)) {message("there is no inverted image"); }
     if(!mdata1->SaveProcMatrix(filesave)) {message("there is no image image"); }
+    message("files successfully saved");
+}
+
+
+void MainWindow::SaveSelected(){
+
+    QFileDialog dialog(this);
+    QString path = dialog.getSaveFileName(this, tr("Save File"), filename);
+
+    if (!path.isEmpty()){} // file name has been choosen
+    else{message("file name has not been choosen"); return;}
+    QByteArray var = path.toLatin1(); //  convertion from QString to char*
+    sprintf(filesave,"%s",var.data()); // get path location
+
+    /*
+    //fp >> savePES >> saveANG >> savePROC >> saveINV;
+    fp >> saving_flags[5] >> saving_flags[6] >> saving_flags[7] >> saving_flags[8];
+    */
+
+    if(!mdata1) {message("there is no data"); return;}
+    if (saving_flags[5]){
+        if(!mdata1->SavePES(filesave)) {message("there is no spectrum"); }
+    }
+    if (saving_flags[6]){
+        if(!mdata1->SaveAng(filesave)) {message("there is no angular distribution"); }
+    }
+    if (saving_flags[7]){
+        if(!mdata1->SaveProcMatrix(filesave)) {message("there is no image image"); }
+    }
+    if (saving_flags[8]){
+        if(!mdata1->SaveInvMatrix(filesave)) {message("there is no inverted image"); }
+    }
     message("files successfully saved");
 }
 
@@ -1261,6 +1296,8 @@ void MainWindow::SaveSettings()
     outFile1 << "\t" << transpose_flag << "\t" << subtractbkg_flag<< endl;
     outFile1 << "\t" << lthickness << endl;
     outFile1 << "\t" << r << "\t" << g << "\t" << b << endl;
+    //outFile1 << "\t" << PES << "\t" << ANG << "\t" << PROC << "\t" << INV << endl;
+    outFile1 << "\t" << saving_flags[5] << "\t" << saving_flags[6] << "\t" << saving_flags[7] << "\t" << saving_flags[8] << endl;
     outFile1.close();
 
     message("settings are saved");
@@ -1287,10 +1324,12 @@ void MainWindow::LoadSettings()
     fp >> current_folder;
     fp >> bit_depth >> binary_width >>binary_height;
     fp >> Lfile_type >> n_quadrant;
-    for (int i=0;i<4;i++) fp >>saving_flags[i];
+    for (int i=0;i<4;i++) fp >> saving_flags[i];
     fp >> transpose_flag >> subtractbkg_flag;
     fp >> lthickness;
     fp >> r >> g >> b;
+    //fp >> savePES >> saveANG >> savePROC >> saveINV;
+    fp >> saving_flags[5] >> saving_flags[6] >> saving_flags[7] >> saving_flags[8];
     fp.close();
 
     color1.setRed(r); color1.setGreen(g); color1.setBlue(b);
@@ -1310,6 +1349,7 @@ void MainWindow::OptionDialog()
     mbasis[8] = Skip_lines;
     mbasis[9] = lthickness;
     bool other_flags[2]; other_flags[0] = transpose_flag; other_flags[1] = subtractbkg_flag;
+    //Options                 (this, mbasis, saving_flags, other_flags, &color)
     Options *opt = new Options(this, mbasis, saving_flags, other_flags, &color1);
     bool ok = opt->exec() == QDialog::Accepted;
     delete opt;
