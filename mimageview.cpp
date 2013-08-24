@@ -90,6 +90,7 @@ void MImageView::DrawArray(double* array, int size_x, int size_y, double max_val
     if (array_view) delete [] array_view;
     array_view = new double [size_x * size_y];
 
+
     for (int i=0;i<size_y;i++){  //  y coordinate / vertical
         for (int j=0;j<size_x;j++){ // x coordinate / horizontal
             array_view[j + i*size_x] = array[j + i*size_x];
@@ -112,17 +113,26 @@ QRgb MImageView::colourMap(int intensity, int max_value){
     /* Implementation of JET colour map from http://www.metastine.com/?p=7
      *
      */
-    double norm  = intensity/(double) max_value;
-    double fourValue = 4 * norm;
-    int red   = std::min(fourValue - 1.5, -fourValue + 4.5)*255;
-    int green = std::min(fourValue - 0.5, -fourValue + 3.5)*255;
-    int blue  = std::min(fourValue + 0.5, -fourValue + 2.5)*255;
+    QRgb out;
 
-    if (red < 0)   red = 0;
-    if (green < 0) green = 0;
-    if (blue < 0)  blue = 0;
+    if (intensity == 0){
+        out = qRgb(0, 0, 0);
+    }
+    else {
+        double norm  = intensity/(double) max_value;
+        double fourValue = 4 * norm;
+        int red   = std::min(fourValue - 1.5, -fourValue + 4.5)*255;
+        int green = std::min(fourValue - 0.5, -fourValue + 3.5)*255;
+        int blue  = std::min(fourValue + 0.5, -fourValue + 2.5)*255;
 
-    return qRgb(red, green, blue); // qt rgb type
+        if (red < 0)   red = 0;
+        if (green < 0) green = 0;
+        if (blue < 0)  blue = 0;
+
+        out = qRgb(red, green, blue);
+    }
+
+    return out; // qt rgb type
 }
 
 void MImageView::ReDraw()
@@ -131,18 +141,17 @@ void MImageView::ReDraw()
     //double cvalue, m_value_new;
     //int pos_bott = ui->horizontalSlider_bottom->value();
     int pos_top = ui->horizontalSlider_top->value(); //ui->horizontalSlider_top->value();
-    int intensity ;
+    int max = m_value * pos_top / 255.0;
+    int intensity;
     //m_value = 2;
     QRgb value;
     for (int i=0;i<image_height;i++){  //  y coordinate / vertical
         for (int j=0;j<image_width;j++){ // x coordinate / horizontal
             //cvalue = log10(10 + (array_view[j + i*image_width] / m_value)*100);
             //m_value_new = log10(110);
-            intensity = (int)( 255.0 * array_view[j + i*image_width] / m_value);
-            //int intensity = (int)( 255.0 * cvalue / m_value_new);
-            intensity = intensity * ( 255.0 / pos_top );
-            if ( intensity > 255.0 || intensity < 0.0) value = qRgb(189, 149, 39);
-            else {value = colourMap(intensity, m_value);}
+            intensity = array_view[j + i*image_width];
+            if ( intensity > max || intensity < 0.0) value = qRgb(189, 149, 39);
+            else {value = colourMap(intensity, max);}
 
             m_image->setPixel( QPoint(j,i), value );
         }
