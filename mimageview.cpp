@@ -90,20 +90,9 @@ void MImageView::DrawArray(double* array, int size_x, int size_y, double max_val
     if (array_view) delete [] array_view;
     array_view = new double [size_x * size_y];
 
-    int intensity;
-    QRgb value;
-
     for (int i=0;i<size_y;i++){  //  y coordinate / vertical
         for (int j=0;j<size_x;j++){ // x coordinate / horizontal
             array_view[j + i*size_x] = array[j + i*size_x];
-
-            intensity = array_view[j + i*size_x];
-            if ( intensity > m_value || intensity < 0) value = qRgb(189, 149, 39);
-            else {
-                value = colourMap(intensity, m_value);
-                }
-
-            m_image->setPixel( QPoint(j,i), value );
         }
     }
 
@@ -129,19 +118,10 @@ QRgb MImageView::colourMap(int intensity, int max_value){
     int green = std::min(fourValue - 0.5, -fourValue + 3.5)*255;
     int blue  = std::min(fourValue + 0.5, -fourValue + 2.5)*255;
 
-    if (red < 0){
-        red = 0;
-    }
-    if (green < 0){
-        green = 0;
-    }
-    if (blue < 0){
-        blue = 0;
-    }
+    if (red < 0)   red = 0;
+    if (green < 0) green = 0;
+    if (blue < 0)  blue = 0;
 
-    //if (intensity != 0) {
-    //    printf("%i, %i, %f, (%i, %i, %i)\n", intensity, max_value, norm, red, green, blue);
-   // }
     return qRgb(red, green, blue); // qt rgb type
 }
 
