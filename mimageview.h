@@ -48,7 +48,7 @@ protected:
 
 private:
     Ui::MImageView *ui;
-
+    QRgb colourMap(int intensity, int max_value);
     void load_color_map(char* filename, colormap* var);  // loading colourmap for 2D histogram
     void update_scaling(); // update parameters when widget size is changes
     colormap         newmap;  // colourmap structure

@@ -2,6 +2,7 @@
 #include "ui_mimageview.h"
 
 #include "math.h"
+#include <algorithm>
 
 #include <QtGui>
 #include <QLabel>
@@ -47,8 +48,8 @@ MImageView::MImageView(QWidget *parent) :
 
     // loadading a colour map for 2D image
     //char colormap_file[] = "/home/roman/Prog/QtBased/MImageViewer/colourmap.py"; // Not a good solution. It has to be changed
-    char colormap_file[] = "colourmap.py"; // Not a good solution. It has to be changed
-    load_color_map(colormap_file, &newmap);
+    //char colormap_file[] = "colourmap.py"; // Not a good solution. It has to be changed
+    //load_color_map(colormap_file, &newmap);
 
     //connect( ui->horizontalSlider_bottom, SIGNAL( sliderReleased() ), this, SLOT( ReDraw() ) );
     connect( ui->horizontalSlider_top, SIGNAL( sliderReleased() ), this, SLOT( ReDraw() ) );
@@ -96,9 +97,11 @@ void MImageView::DrawArray(double* array, int size_x, int size_y, double max_val
         for (int j=0;j<size_x;j++){ // x coordinate / horizontal
             array_view[j + i*size_x] = array[j + i*size_x];
 
-            intensity = (int)( (255.0 * array_view[j + i*size_x]) / m_value);
-            if ( intensity > 255.0 || intensity < 0.0) value = qRgb(189, 149, 39);
-            else {value = newmap.value[intensity];}
+            intensity = array_view[j + i*size_x];
+            if ( intensity > m_value || intensity < 0) value = qRgb(189, 149, 39);
+            else {
+                value = colourMap(intensity, m_value);
+                }
 
             m_image->setPixel( QPoint(j,i), value );
         }
@@ -114,6 +117,32 @@ void MImageView::DrawArray(double* array, int size_x, int size_y, double max_val
     //x_scale = (double) (size_x - 1) / (double) (imageLabel->size().width() - 1);
     //y_scale = (double) (size_y - 1) / (double) (imageLabel->size().height() - 1);
     ReDraw();
+}
+
+QRgb MImageView::colourMap(int intensity, int max_value){
+    /* Implementation of JET colour map from http://www.metastine.com/?p=7
+     *
+     */
+    double norm  = intensity/(double) max_value;
+    double fourValue = 4 * norm;
+    int red   = std::min(fourValue - 1.5, -fourValue + 4.5)*255;
+    int green = std::min(fourValue - 0.5, -fourValue + 3.5)*255;
+    int blue  = std::min(fourValue + 0.5, -fourValue + 2.5)*255;
+
+    if (red < 0){
+        red = 0;
+    }
+    if (green < 0){
+        green = 0;
+    }
+    if (blue < 0){
+        blue = 0;
+    }
+
+    //if (intensity != 0) {
+    //    printf("%i, %i, %f, (%i, %i, %i)\n", intensity, max_value, norm, red, green, blue);
+   // }
+    return qRgb(red, green, blue); // qt rgb type
 }
 
 void MImageView::ReDraw()
@@ -133,7 +162,7 @@ void MImageView::ReDraw()
             //int intensity = (int)( 255.0 * cvalue / m_value_new);
             intensity = intensity * ( 255.0 / pos_top );
             if ( intensity > 255.0 || intensity < 0.0) value = qRgb(189, 149, 39);
-            else {value = newmap.value[intensity];}
+            else {value = colourMap(intensity, m_value);}
 
             m_image->setPixel( QPoint(j,i), value );
         }
@@ -287,7 +316,7 @@ void MImageView::resizeEvent(QResizeEvent *event)
     //ui->lineEdit_bincontent->setText(buffer);
 }
 
-
+/*
 void MImageView::load_color_map(char* filename, colormap* var)
 {
     FILE* pFile; pFile = NULL;
@@ -311,6 +340,7 @@ void MImageView::load_color_map(char* filename, colormap* var)
     }
     fclose (pFile);
 }
+*/
 
 void MImageView::setCircle(int posx, int posy, int radius){
     cursor_x = posx*x_scale;
