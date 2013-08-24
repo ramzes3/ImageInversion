@@ -46,11 +46,6 @@ MImageView::MImageView(QWidget *parent) :
     QRect LabelG; LabelG.moveTop(geometry_yoffset);
     imageLabel->setGeometry(LabelG);
 
-    // loadading a colour map for 2D image
-    //char colormap_file[] = "/home/roman/Prog/QtBased/MImageViewer/colourmap.py"; // Not a good solution. It has to be changed
-    //char colormap_file[] = "colourmap.py"; // Not a good solution. It has to be changed
-    //load_color_map(colormap_file, &newmap);
-
     //connect( ui->horizontalSlider_bottom, SIGNAL( sliderReleased() ), this, SLOT( ReDraw() ) );
     connect( ui->horizontalSlider_top, SIGNAL( sliderReleased() ), this, SLOT( ReDraw() ) );
     connect( ui->horizontalSlider_bottom, SIGNAL( valueChanged(int) ), this, SLOT( resizeWidget(int) ) );
@@ -304,32 +299,6 @@ void MImageView::resizeEvent(QResizeEvent *event)
     //sprintf(buffer,"%2.2f", x_scale);
     //ui->lineEdit_bincontent->setText(buffer);
 }
-
-/*
-void MImageView::load_color_map(char* filename, colormap* var)
-{
-    FILE* pFile; pFile = NULL;
-    char buffer, str[255];
-    pFile = fopen (filename , "r");
-    if (pFile == 0) {return;}
-    buffer = fscanf(pFile, "%s", str);
-    strcpy(var->title, str);
-    int col1, col2, col3;
-    for (int i=0;i<256;i++){
-        do { buffer = getc(pFile); } while (buffer != '\(');
-        buffer = fscanf(pFile, "%d", &col1);
-        buffer = getc(pFile); buffer = getc(pFile);
-        buffer = fscanf(pFile, "%d", &col2);
-        buffer = getc(pFile); buffer = getc(pFile);
-        buffer = fscanf(pFile, "%d", &col3);
-        var->red[i] = col1; var->green[i] = col2; var->blue[i] = col3;
-        var->value[i] = qRgb(col1, col2, col3);
-        buffer = getc(pFile);
-        buffer = getc(pFile);
-    }
-    fclose (pFile);
-}
-*/
 
 void MImageView::setCircle(int posx, int posy, int radius){
     cursor_x = posx*x_scale;

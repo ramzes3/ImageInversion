@@ -2,10 +2,8 @@
 #define MIMAGEVIEW_H
 
 #include <QWidget>
-#include "colormap.h"
 
 class QLabel;
-struct colormap;
 
 namespace Ui {
     class MImageView;
@@ -49,9 +47,7 @@ protected:
 private:
     Ui::MImageView *ui;
     QRgb colourMap(int intensity, int max_value);
-    void load_color_map(char* filename, colormap* var);  // loading colourmap for 2D histogram
     void update_scaling(); // update parameters when widget size is changes
-    colormap         newmap;  // colourmap structure
     //double           pixel_scale; // ratio of the x/y pixel size of the monitor.
 
     QLabel          *imageLabel;
