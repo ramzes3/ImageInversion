@@ -36,10 +36,6 @@ Options::Options(QWidget *parent, int *par, bool *saving_flags, bool *flags2, QC
     ui->doubleSpinBox_thickness->setValue(par[9]);
     //  checkboxes   
     //
-    ui->checkBox_orig->setChecked(saving_flags[0]);
-    ui->checkBox_inv->setChecked(saving_flags[1]);
-    ui->checkBox_pes->setChecked(saving_flags[2]);
-    ui->checkBox_betas->setChecked(saving_flags[3]);
     ui->checkBox_transpose->setChecked(flags2[0]);
     ui->checkBox_subtract_bkg->setChecked(flags2[1]);
     //
@@ -67,11 +63,6 @@ Options::~Options()
     ovar[7] = ui->spinBox_quadrant->value();
     ovar[8] = ui->spinBox_skiplines->value();
     ovar[9] = ui->doubleSpinBox_thickness->value();
-
-    bool_var[0] = ui->checkBox_orig->isChecked();
-    bool_var[1] = ui->checkBox_inv->isChecked();
-    bool_var[2] = ui->checkBox_pes->isChecked();
-    bool_var[3] = ui->checkBox_betas->isChecked();
 
     bool_var[5] = ui->checkBox_savePES->isChecked();
     bool_var[6] = ui->checkBox_saveANG->isChecked();

@@ -452,6 +452,7 @@ void MainWindow::Analise()
         sprintf(dirname,"%s",var.data()); // get path location
 
         sprintf(filename,"%s/%s/%s", work_dir_c, dirname, file_template);
+        printf("Opening: %s\n", filename);
 
         if (!mdata1->Load_2D(filename,transpose_flag)) {message("cannot open file for reading"); continue;}
         //mdata1->normalise_2darray(mdata1->array_2D_initial);
@@ -492,21 +493,21 @@ void MainWindow::Analise()
                 sprintf(filename,"%s/%s/inversion/x%iy%i/q%i", work_dir_c, dirname, xc, yc, n_quadrant); //output folder
                 break;
         }
-        //
-
         sprintf(bufferc, "%s_orig", filename);
         SaveImage(bufferc);
-
-
         InvertImage();
-
-
-        if(!mdata1->SavePES(filename)) {message("there is no spectrum"); }
-        if(!mdata1->SaveAng(filename)) {message("there is no angular distribution"); }
-        if(!mdata1->SaveInvMatrix(filename)) {message("there is no inverted image"); }
-        if(!mdata1->SaveProcMatrix(filename)) {message("there is no image image"); }
-
-
+        if (saving_flags[5]){
+            if(!mdata1->SavePES(filename)) {message("there is no spectrum"); }
+        }
+        if (saving_flags[6]){
+            if(!mdata1->SaveAng(filename)) {message("there is no angular distribution"); }
+        }
+        if (saving_flags[7]){
+            if(!mdata1->SaveProcMatrix(filename)) {message("there is no image image"); }
+        }
+        if (saving_flags[8]){
+            if(!mdata1->SaveInvMatrix(filename)) {message("there is no inverted image"); }
+        }
     } // main loop
     ui->progressBar->setVisible(0);
     if(mdata1) delete mdata1;
