@@ -120,6 +120,10 @@ QRgb MImageView::colourMap(int intensity, int max_value){
         int green = std::min(fourValue - 0.5, -fourValue + 3.5)*255;
         int blue  = std::min(fourValue + 0.5, -fourValue + 2.5)*255;
 
+        if (red > 255)   red = 255;
+        if (green > 255) green = 255;
+        if (blue > 255)  blue = 255;
+
         if (red < 0)   red = 0;
         if (green < 0) green = 0;
         if (blue < 0)  blue = 0;
@@ -140,6 +144,7 @@ void MImageView::ReDraw()
     int intensity;
     //m_value = 2;
     QRgb value;
+
     for (int i=0;i<image_height;i++){  //  y coordinate / vertical
         for (int j=0;j<image_width;j++){ // x coordinate / horizontal
             //cvalue = log10(10 + (array_view[j + i*image_width] / m_value)*100);
