@@ -2,6 +2,7 @@
 #include "ui_mimageview.h"
 
 #include "math.h"
+#include <algorithm>
 
 #include <QtGui>
 #include <QLabel>
@@ -45,11 +46,6 @@ MImageView::MImageView(QWidget *parent) :
     QRect LabelG; LabelG.moveTop(geometry_yoffset);
     imageLabel->setGeometry(LabelG);
 
-    // loadading a colour map for 2D image
-    //char colormap_file[] = "/home/roman/Prog/QtBased/MImageViewer/colourmap.py"; // Not a good solution. It has to be changed
-    char colormap_file[] = "colourmap.py"; // Not a good solution. It has to be changed
-    load_color_map(colormap_file, &newmap);
-
     //connect( ui->horizontalSlider_bottom, SIGNAL( sliderReleased() ), this, SLOT( ReDraw() ) );
     connect( ui->horizontalSlider_top, SIGNAL( sliderReleased() ), this, SLOT( ReDraw() ) );
     connect( ui->horizontalSlider_bottom, SIGNAL( valueChanged(int) ), this, SLOT( resizeWidget(int) ) );
@@ -89,18 +85,10 @@ void MImageView::DrawArray(double* array, int size_x, int size_y, double max_val
     if (array_view) delete [] array_view;
     array_view = new double [size_x * size_y];
 
-    int intensity;
-    QRgb value;
 
     for (int i=0;i<size_y;i++){  //  y coordinate / vertical
         for (int j=0;j<size_x;j++){ // x coordinate / horizontal
             array_view[j + i*size_x] = array[j + i*size_x];
-
-            intensity = (int)( (255.0 * array_view[j + i*size_x]) / m_value);
-            if ( intensity > 255.0 || intensity < 0.0) value = qRgb(189, 149, 39);
-            else {value = newmap.value[intensity];}
-
-            m_image->setPixel( QPoint(j,i), value );
         }
     }
 
@@ -116,24 +104,54 @@ void MImageView::DrawArray(double* array, int size_x, int size_y, double max_val
     ReDraw();
 }
 
+QRgb MImageView::colourMap(int intensity, int max_value){
+    /* Implementation of JET colour map from http://www.metastine.com/?p=7
+     *
+     */
+    QRgb out;
+
+    if (intensity == 0){
+        out = qRgb(0, 0, 0);
+    }
+    else {
+        double norm  = intensity/(double) max_value;
+        double fourValue = 4 * norm;
+        int red   = std::min(fourValue - 1.5, -fourValue + 4.5)*255;
+        int green = std::min(fourValue - 0.5, -fourValue + 3.5)*255;
+        int blue  = std::min(fourValue + 0.5, -fourValue + 2.5)*255;
+
+        if (red > 255)   red = 255;
+        if (green > 255) green = 255;
+        if (blue > 255)  blue = 255;
+
+        if (red < 0)   red = 0;
+        if (green < 0) green = 0;
+        if (blue < 0)  blue = 0;
+
+        out = qRgb(red, green, blue);
+    }
+
+    return out; // qt rgb type
+}
+
 void MImageView::ReDraw()
 {
     if (!array_view) return;
     //double cvalue, m_value_new;
     //int pos_bott = ui->horizontalSlider_bottom->value();
     int pos_top = ui->horizontalSlider_top->value(); //ui->horizontalSlider_top->value();
-    int intensity ;
+    int max = m_value * pos_top / 255.0;
+    int intensity;
     //m_value = 2;
     QRgb value;
+
     for (int i=0;i<image_height;i++){  //  y coordinate / vertical
         for (int j=0;j<image_width;j++){ // x coordinate / horizontal
             //cvalue = log10(10 + (array_view[j + i*image_width] / m_value)*100);
             //m_value_new = log10(110);
-            intensity = (int)( 255.0 * array_view[j + i*image_width] / m_value);
-            //int intensity = (int)( 255.0 * cvalue / m_value_new);
-            intensity = intensity * ( 255.0 / pos_top );
-            if ( intensity > 255.0 || intensity < 0.0) value = qRgb(189, 149, 39);
-            else {value = newmap.value[intensity];}
+            intensity = array_view[j + i*image_width];
+            if ( intensity > max || intensity < 0.0) value = qRgb(189, 149, 39);
+            else {value = colourMap(intensity, max);}
 
             m_image->setPixel( QPoint(j,i), value );
         }
@@ -285,31 +303,6 @@ void MImageView::resizeEvent(QResizeEvent *event)
     //char buffer[100];
     //sprintf(buffer,"%2.2f", x_scale);
     //ui->lineEdit_bincontent->setText(buffer);
-}
-
-
-void MImageView::load_color_map(char* filename, colormap* var)
-{
-    FILE* pFile; pFile = NULL;
-    char buffer, str[255];
-    pFile = fopen (filename , "r");
-    if (pFile == 0) {return;}
-    buffer = fscanf(pFile, "%s", str);
-    strcpy(var->title, str);
-    int col1, col2, col3;
-    for (int i=0;i<256;i++){
-        do { buffer = getc(pFile); } while (buffer != '\(');
-        buffer = fscanf(pFile, "%d", &col1);
-        buffer = getc(pFile); buffer = getc(pFile);
-        buffer = fscanf(pFile, "%d", &col2);
-        buffer = getc(pFile); buffer = getc(pFile);
-        buffer = fscanf(pFile, "%d", &col3);
-        var->red[i] = col1; var->green[i] = col2; var->blue[i] = col3;
-        var->value[i] = qRgb(col1, col2, col3);
-        buffer = getc(pFile);
-        buffer = getc(pFile);
-    }
-    fclose (pFile);
 }
 
 void MImageView::setCircle(int posx, int posy, int radius){
