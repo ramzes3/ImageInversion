@@ -104,17 +104,16 @@ void MImageView::DrawArray(double* array, int size_x, int size_y, double max_val
     ReDraw();
 }
 
-QRgb MImageView::colourMap(int intensity, int max_value){
+QRgb MImageView::colourMap(double intensity, double max_value){
     /* Implementation of JET colour map from http://www.metastine.com/?p=7
      *
      */
     QRgb out;
-
-    if (intensity == 0){
+    if (intensity == 0.0){
         out = qRgb(0, 0, 0);
     }
     else {
-        double norm  = intensity/(double) max_value;
+        double norm  = intensity/max_value;
         double fourValue = 4 * norm;
         int red   = std::min(fourValue - 1.5, -fourValue + 4.5)*255;
         int green = std::min(fourValue - 0.5, -fourValue + 3.5)*255;
@@ -129,8 +128,8 @@ QRgb MImageView::colourMap(int intensity, int max_value){
         if (blue < 0)  blue = 0;
 
         out = qRgb(red, green, blue);
-    }
 
+    }
     return out; // qt rgb type
 }
 
@@ -140,8 +139,8 @@ void MImageView::ReDraw()
     //double cvalue, m_value_new;
     //int pos_bott = ui->horizontalSlider_bottom->value();
     int pos_top = ui->horizontalSlider_top->value(); //ui->horizontalSlider_top->value();
-    int max = m_value * pos_top / 255.0;
-    int intensity;
+    float max = m_value * pos_top / 255.0;
+    float intensity;
     //m_value = 2;
     QRgb value;
 
