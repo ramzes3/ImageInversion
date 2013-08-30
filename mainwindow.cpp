@@ -497,10 +497,18 @@ void MainWindow::Analise()
 
         InvertImage();
 
-        if(!mdata1->SavePES(filename)) {message("there is no spectrum"); }
-        if(!mdata1->SaveAng(filename)) {message("there is no angular distribution"); }
-        if(!mdata1->SaveInvMatrix(filename)) {message("there is no inverted image"); }
-        if(!mdata1->SaveProcMatrix(filename)) {message("there is no image image"); }
+        if (saving_flags[2]){
+            if(!mdata1->SavePES(filename)) {message("there is no spectrum"); }
+        }
+        if (saving_flags[3]){
+            if(!mdata1->SaveAng(filename)) {message("there is no angular distribution"); }
+        }
+        if (saving_flags[0]){
+            if(!mdata1->SaveProcMatrix(filename)) {message("there is no image image"); }
+        }
+        if (saving_flags[1]){
+            if(!mdata1->SaveInvMatrix(filename)) {message("there is no inverted image"); }
+        }
 
     } // main loop
     ui->progressBar->setVisible(0);
