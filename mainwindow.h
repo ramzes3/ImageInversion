@@ -92,7 +92,7 @@ private:
     int               nL, n_r, n_phi, n_basisf;  // dimensions of the pBasex
     int               bit_depth, binary_width, binary_height; // seetings for loading binary file
     int               Lfile_type, n_quadrant;
-    bool              saving_flags[9], transpose_flag, subtractbkg_flag;
+    bool              saving_flags[5], transpose_flag, subtractbkg_flag;
     QColor            color1;
     int               lthickness;
 
