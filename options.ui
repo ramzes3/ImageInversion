@@ -48,7 +48,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -244,6 +244,25 @@
      </property>
      <property name="text">
       <string>Save INV</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_9">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>100</y>
+       <width>71</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Saving files</string>
+     </property>
+     <property name="frame">
+      <bool>false</bool>
      </property>
     </widget>
    </widget>
@@ -551,83 +570,6 @@
        <bool>false</bool>
       </property>
      </widget>
-    </widget>
-    <widget class="QCheckBox" name="checkBox_orig">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>120</y>
-       <width>121</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Original VMI ASCII</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBox_inv">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>140</y>
-       <width>131</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Inverted image ASCII</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBox_pes">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>160</y>
-       <width>101</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>PES</string>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBox_betas">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>180</y>
-       <width>101</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>betas</string>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit_9">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>90</y>
-       <width>71</width>
-       <height>27</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Saving files</string>
-     </property>
-     <property name="frame">
-      <bool>false</bool>
-     </property>
     </widget>
     <widget class="QLineEdit" name="lineEdit_13">
      <property name="enabled">
