@@ -46,7 +46,7 @@ protected:
 
 private:
     Ui::MImageView *ui;
-    QRgb colourMap(int intensity, int max_value);
+    QRgb colourMap(double intensity, double max_value);
     void update_scaling(); // update parameters when widget size is changes
     //double           pixel_scale; // ratio of the x/y pixel size of the monitor.
 
