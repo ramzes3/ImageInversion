@@ -15,6 +15,7 @@ public:
     //int Load_2D_new( char* );  // new version of the above but not finished also not required for now
     int Load_binary(char* , int, int, int, bool); // Load binary data
     int Load_histo( double*, double*, int, double, double, double, double );
+    int Load_1D(char*); // loading normalisation time profile
     int GetsizeX();
     int GetsizeY();
     double Get_pix_value(int, int);
@@ -25,7 +26,7 @@ public:
 
     // Data processing functions
     void transpose();
-    void normalise_2darray( double* ); // normalisation on 1
+    void normalise_2darray( double*, double ); // normalisation on arbitrary number
     double find_max( double* ); // returns maximum from any double array of size = size_x*size_y
     double find_max( double*, int ); // returns maximum from any double array of any size
     void circle_mask( int, int, int ); // apply circle mask to the image
@@ -59,6 +60,8 @@ public:
     double      *array_2D_initial, *array_2D_processed, *array_2D_result;
     double      *array_2D_tot_sig, *array_2D_bkg;
     double      *polar_2D_image;
+    double      *time_profile; // normailization of VMI images
+    int         delay_steps; // number of time delays
     int         size_x, size_y;
     int         size_r, size_phi, scaling;
 

@@ -234,11 +234,11 @@ void MainWindow::InvertImage()
     SetBasisDim(); // change the dimesions of the basis set in PBasex in the invers class
     invers->set_size( mdata1->size_x, mdata1->size_y );
     //invers->start(QThread::NormalPriority);
-    invers->load_matrices(nl,odd);
+    invers->load_matrices(nl,odd);    
     if(!invers->m_isloaded){message("can not load basex matricies"); return;}
     invers->polar_b(mdata1->input_2d_array, mdata1->output_2d_array, xc, yc, dr, nl, odd);
     //delete invers;
-
+    return;
     mdata1->copy_f_to_d(mdata1->output_2d_array);
     if(odd) mdata1->nL = nl;
     else mdata1->nL = nl/2;
@@ -881,13 +881,19 @@ void MainWindow::ConvertQstringToChar(QString qstring1, char* char_out){
 }
 
 void MainWindow::ConvertImages()
-{
-
+{    
     if(!mdata1) {message("There is no data loaded"); return;}
+    double db_var, *ptr_var;
+/*
+    getPath();
+    if(!file_status){return;}
+    if (!mdata1->Load_1D(filename)) {message("cannot open file for reading"); return;}
+*/
+    char work_dir_c[255],fileout[255], work_dir_c2[255], work_dir_c3[255], buffer[255];//, buffer[255];
 
-    char work_dir_c[255],fileout[255],work_dir_c2[255], buffer[255];//, buffer[255];
-    sprintf(work_dir_c,"D:/Roman/Data/20130531/CS2_electrons/Inverted1");
-    sprintf(work_dir_c2,"D:/Roman/Data/20130531/CS2_electrons/Inverted2");
+    sprintf(work_dir_c,"D:/Roman/Data/20130828/FirstRun");
+    sprintf(work_dir_c2,"D:/Roman/Data/20130828/SecondRun");
+    sprintf(work_dir_c3,"D:/Roman/Data/20130828/ThirdRun");
 /*
     QStringList files = QFileDialog::getOpenFileNames(
                             this,
@@ -895,20 +901,25 @@ void MainWindow::ConvertImages()
                             "D:/Musor/CS2Data",
                             "Images (*.*)");
     */
-    QStringList files, files2;
+    QStringList files, files2, files3;
 
-    sprintf(fileout,"%s/CS2images1_-1500000.dat.inv", work_dir_c);
+    sprintf(fileout,"%s/CS2_VMI_1_-1500000.dat", work_dir_c);
     files << fileout;
 
-    sprintf(fileout,"%s/CS2images2_-1500000.dat.inv", work_dir_c2);
+    sprintf(fileout,"%s/CS2_VMI_2_-1500000.dat", work_dir_c2);
     files2 << fileout;
 
-    int delay = -33000;
-    for(int i = 0; i<83;i++) {
-        sprintf(fileout,"%s/CS2images1_%d.dat.inv", work_dir_c, delay);
+    sprintf(fileout,"%s/CS2_VMI_3_-1500000.dat", work_dir_c3);
+    files3 << fileout;
+
+    int delay = 296000;
+    for(int i = 0; i<155;i++) {
+        sprintf(fileout,"%s/CS2_VMI_1_%d.dat", work_dir_c, delay);
         files << fileout;
-        sprintf(fileout,"%s/CS2images2_%d.dat.inv", work_dir_c2, delay);
+        sprintf(fileout,"%s/CS2_VMI_2_%d.dat", work_dir_c2, delay);
         files2 << fileout;
+        sprintf(fileout,"%s/CS2_VMI_3_%d.dat", work_dir_c3, delay);
+        files3 << fileout;
 
         delay = delay + 2000;
     }
@@ -931,15 +942,16 @@ void MainWindow::ConvertImages()
     ui->progressBar->setVisible(1);
 
 ////////////////////////// A summary file  ////////////////////////////
+/*
     sprintf(fileout,"%s/Summary_ALL_empty.%s", work_dir_c2, "txt");
     ofstream outFile1(fileout, ios::out);
     if(!outFile1){ message("cannot create summary file"); return; }
-
+*/
 ///////////////////////////////
 
-    int xc = ui->spinBox_xc->value();
-    int yc = ui->spinBox_yc->value();
-    int dr = ui->spinBox_dr->value();
+    //int xc = ui->spinBox_xc->value();
+    //int yc = ui->spinBox_yc->value();
+    //int dr = ui->spinBox_dr->value();
 
     int file_start, file_stop; file_start=0; file_stop = files.size();
     for(int k = file_start; k < file_stop; k++){ // main loop
@@ -948,25 +960,35 @@ void MainWindow::ConvertImages()
 
         QByteArray var = files.at(k).toLatin1();// dir.toLatin1(); // convertion from QString to char*
         sprintf(filename,"%s",var.data()); // get path location
-        if (!mdata1->Load_2D(filename, transpose_flag)) {message("cannot open file for reading"); continue;}
-        //if (!mdata1->Load_binary(filename, 32, 1024, 1024, transpose_flag)) {message("cannot open file for reading 1"); continue;}
+        //if (!mdata1->Load_2D(filename, transpose_flag)) {message("cannot open file for reading"); continue;}
+        if (!mdata1->Load_binary(filename, 32, 1024, 1024, transpose_flag)) {message("cannot open file for reading 1"); continue;}
 
         //  Adding another file
-        if (!mdata1->Copy_2D_ini_to_result()){message("cannot creat processed array"); continue;}
+        if (!mdata1->Copy_2D_ini_to_result()){message("cannot creat result array"); continue;}
         var = files2.at(k).toLatin1(); // dir.toLatin1(); // convertion from QString to char*
         sprintf(filename,"%s",var.data()); // get path location
-        if (!mdata1->Load_2D(filename,transpose_flag)) {message("cannot open file for reading"); continue;}
-        //if (!mdata1->Load_binary(filename, 32, 1024, 1024, transpose_flag)) {message("cannot open file for reading 2"); continue;}
+        //if (!mdata1->Load_2D(filename,transpose_flag)) {message("cannot open file for reading"); continue;}
+        if (!mdata1->Load_binary(filename, 32, 1024, 1024, transpose_flag)) {message("cannot open file for reading 2"); continue;}
         if (!mdata1->Add_result_ini_to_ini()){message("cannot creat processed array"); continue;}
         // end of the adding file
 
+        //  Adding another file        
+        var = files3.at(k).toLatin1(); // dir.toLatin1(); // convertion from QString to char*
+        sprintf(filename,"%s",var.data()); // get path location
+        //if (!mdata1->Load_2D(filename,transpose_flag)) {message("cannot open file for reading"); continue;}
+        if (!mdata1->Load_binary(filename, 32, 1024, 1024, transpose_flag)) {message("cannot open file for reading 2"); continue;}
+        if (!mdata1->Add_result_ini_to_ini()){message("cannot creat processed array"); continue;}
+        // end of the adding file
 
-        //sprintf(fileout,"%s_sum", filename);
-        //if(!mdata1->SaveProcMatrix(filename)) {message("there is no image image"); }
+        // Normalise array;
+        //mdata1->normalise_2darray(mdata1->array_2D_processed, mdata1->time_profile[k]);
+
+        sprintf(fileout,"%s_sum", filename);
+        if(!mdata1->SaveProcMatrix(filename)) {message("there is no image image"); }
 
         //total_counts = mdata1->TotalCounts(mdata1->array_2D_initial, xc, yc, dr); //mdata1->find_max(mdata1->array_2D_processed);
         //max_content = mdata2->array_2D_initial[k]*1000*(6561695/total_counts); //mdata1->find_max(mdata1->array_2D_processed);
-
+        /*
         max_content = mdata1->find_max(mdata1->array_2D_processed)/20;
 
         image_window->DrawArray( mdata1->array_2D_processed, mdata1->size_x, mdata1->size_y, max_content);
@@ -978,6 +1000,7 @@ void MainWindow::ConvertImages()
 
         sprintf(buffer, "%s/%d", work_dir_c, k);
         SaveImage(buffer);
+        */
 
     } // main loop
 
@@ -1087,182 +1110,20 @@ void MainWindow::DataManipulation()
 
 void MainWindow::Test()
 {
-    //DataManipulation();
-/*
-    if(!mdata1) {message("There is no data loaded"); return;}
-    int xc = ui->spinBox_xc->value();
-    int yc = ui->spinBox_yc->value();
-    mdata1->Get_quarter1(xc, yc);
+    getPath();
+    if(!file_status){return;}
+    //if(mdata1) delete mdata1;
+    if(!mdata1) mdata1 = new MData();
 
-    DeclareMImageView();
-    double max_content = mdata1->find_max(mdata1->array_2D_processed);
-    image_window->DrawArray( mdata1->array_2D_processed, mdata1->size_x, mdata1->size_y, max_content );
-    image_window->update();
-    image_window->show();
-
-*/
-
-    if(!invers) Declear_pBasex();
-    if(!invers) return;
-    invers->generateTestVMI(512, 20, 200, 1.1);
-    return;
-
-    if(!mdata1) {message("There is no data loaded"); return;}
-
-    QStringList files = QFileDialog::getOpenFileNames(
-                            this,
-                            "Select one or more files to join",
-                            filename,
-                            "Images (*.*)");
-
-    if (!files.isEmpty()){message("Inversion starts");} // file name has been choosen
-    else{message("files have not been choosen"); return;}
-
-    Declear_pBasex();
-
-    int xc = ui->spinBox_xc->value();
-    int yc = ui->spinBox_yc->value();
-    int dr = ui->spinBox_dr->value();
-
-    char *work_dir_c = "D:/Roman/Data/20130531/CS2_electrons/SumImages";
-    //char *work_dir = "E:/Roman/Data/AnilineTunnelingStudy/20120704";
-/*
-    QString work_dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-                                                    "D:/Roman/Data/",
-                                                    QFileDialog::ShowDirsOnly
-                                                    | QFileDialog::DontResolveSymlinks);
-
-    QDir workDir(work_dir);
-    //QStringList dir_list = workDir.entryList(QDir::AllDirs);
-    //QStringList file_list = workDir.entryList(QDir::Files);
-    QFileInfoList file_info = workDir.entryInfoList(QDir::Files);
-    QByteArray buffer = work_dir.toLocal8Bit();
-    const char *work_dir_c = buffer.data();
-*/
-    char fileout[255];
-    //sprintf(fileout,"%s/test.%s", work_dir_c, "txt");
-    sprintf(fileout,"%s/test.%s", work_dir_c, "txt");
-    ofstream outFile1(fileout, ios::out);
-    if(!outFile1){ return; }
-
-    sprintf(fileout,"%s/Summary_PES.%s", work_dir_c, "txt");
-    ofstream outFile2(fileout, ios::out);
-    if(!outFile2){ return; }
-
-    sprintf(fileout,"%s/Summary_beta2.%s", work_dir_c, "txt");
-    ofstream outFile3(fileout, ios::out);
-    if(!outFile2){ return; }
-
-    sprintf(fileout,"%s/Summary_beta4.%s", work_dir_c, "txt");
-    ofstream outFile4(fileout, ios::out);
-    if(!outFile2){ return; }
-
-    if(mdata1) delete mdata1;
-    mdata1 = new MData();
-    mdata1->Nskip_lines = Skip_lines;
-
-    // //////////////   S i n g l e    B k g    f i l e ///////////////////////////////////////
-    sprintf(filename,"%s/CS2images2_125000.dat.proc",work_dir_c);
-    //if (!mdata1->Load_binary(filename, 32, 1024, 1024, transpose_flag)) {message("cannot open bkg file for reading"); return;}
-    if (!mdata1->Load_2D(filename,transpose_flag)) {message("cannot open bkg file for reading"); return;}
-    SetBkg();//mdata1->SetBackground();
-/*
-    sprintf(filename,"%s/CS2images2_-1500000.dat.proc",work_dir_c);
-    if (!mdata1->Load_2D(filename,transpose_flag)) {message("cannot open bkg file for reading"); return;}
-    mdata1->Add_bkg(2);//mdata1->SetBackground();
-*/
-    // ///////////////////////////////////////////////////////////////
-
-    //char temp_name[255];//, buffer[255]; dirname[255],
-    ui->progressBar->setValue(0);
-    ui->progressBar->setVisible(1);
-    int file_start, file_stop; file_start=0; file_stop = files.size(); //file_info.size();
-    for(int k = file_start; k < file_stop; k++){ // main loop
-    //for(int k = 4; k < 5; k++){ // main loop
-
-        ui->progressBar->setValue(100*(k-file_start + 1)/(file_stop-file_start + 1));
-        //if(file_info.at(k).suffix() != "dat") continue;
-
-        //QByteArray var = file_info.at(k).fileName().toLatin1();// dir.toLatin1(); //  convertion from QString to char*
-        //sprintf(temp_name,"%s",var.data()); // get path location
-
-        QByteArray var = files.at(k).toLatin1();// dir.toLatin1(); // convertion from QString to char*
-        sprintf(filename,"%s",var.data()); // get path location
-        //if (!mdata1->Load_2D(filename,transpose_flag)) {message("cannot open file for reading"); continue;}
-
-        // inner loop
-       //for(int z = 1; z < 6; z++){ // inner loop
-        //sprintf(filename,"%s/%s/PumpOnly%d.txt", work_dir_c, dirname,z);
-        //sprintf(filename,"cs2_images_-1800000.dat");
-        //if (!mdata1->Load_binary(filename, 32, 1024, 1024, transpose_flag)) {message("cannot open file for reading"); continue;}
-        //SetBkg();//mdata1->SetBackground();
-        //sprintf(filename,"%s/%s/ProbeOnly%d.txt", work_dir_c, dirname,z);
-        //sprintf(filename,"%s/%s/ProbeOnly.txt", work_dir_c, dirname);
-        //if (!mdata1->Load_2D(filename,transpose_flag)) {message("cannot open file for reading"); continue;}
-        //Add_bkg(); //mdata1->Add_bkg();
-        //sprintf(filename,"%s/%s/PumpProbePumpProbe%d.txt", work_dir_c, dirname,z);
-
-        //sprintf(filename,"%s/%s", work_dir_c, temp_name);
-        if (!mdata1->Load_2D(filename,transpose_flag)) {message("cannot open file for reading"); continue;}
-
-        outFile1 << filename << "\t Total: \t"<< mdata1->TotalCounts(mdata1->array_2D_initial, xc, yc, dr) << "\t Bkg: \t" << mdata1->TotalCounts(mdata1->array_2D_bkg, xc, yc, dr)<<endl;
-
-        mdata1->Subtract_bkg();
-        mdata1->Copy_2D_ini_to_processed(); //Subtract_bkg();
-
-        //mdata1->Symmetrise(xc, yc);
-        //mdata1->Get_quarter4(xc,yc);
-
-        //sprintf(filename,"%s/%s_save", work_dir_c, temp_name);
-        //sprintf(filename,"%s_save", filename);
-
-        //sprintf(filename,"%s/%s/NotQuartered%d", work_dir_c, dirname, z);
-        //mdata1->Get_quarter1(xc, yc);
-
-/*
-        double max_content = mdata1->find_max(mdata1->array_2D_processed);
-
-        image_window->DrawArray( mdata1->array_2D_processed, mdata1->size_x, mdata1->size_y, max_content);
-        image_window->update();
-        image_window->show();
-
-        sprintf(buffer, "%s_orig", filename);
-        SaveImage(buffer);
-*/
-
-        //InvertImage1();
-        //sleep(3);
-
-        //sprintf(buffer, "%s_inv", filename);
-        //SaveImage(buffer);
-
-        //mdata1->copy_pes(invers->ang);
-/*
-        outFile2 << filename << "\t";
-        outFile3 << filename << "\t";
-        outFile4 << filename << "\t";
-        for (int j=0;j<mdata1->size_spectrum;j++) {
-            outFile2 << "\t"<< mdata1->array_1D_spectrum[j];
-            outFile3 << "\t" << mdata1->array_coeffs[0+j*mdata1->nL];
-            outFile4 << "\t" << mdata1->array_coeffs[1+j*mdata1->nL];
-        }
-        outFile2 << endl; outFile3 << endl; outFile4 << endl;
-*/
+    if (!mdata1->Load_1D(filename)) {message("cannot open file for reading"); return;}
 
 
-        //if(!mdata1->SavePES(filename)) {message("there is no spectrum"); }
-        //if(!mdata1->SaveAng(filename)) {message("there is no angular distribution"); }
-        //if(!mdata1->SaveInvMatrix(filename)) {message("there is no inverted image"); }
-        if(!mdata1->SaveProcMatrix(filename)) {message("there is no image image"); }
-
-        //}//inner loop
-
-    } // main loop
-    ui->progressBar->setVisible(0);
-    if(mdata1) delete mdata1;
-    mdata1 = NULL;
-    outFile1.close(); outFile2.close(); outFile3.close(); outFile4.close();
-
+    if(mspectr) delete mspectr;
+    mspectr = new MSpectrum(this);
+    mspectr->setWindowFlags(mspectr->windowFlags() | Qt::Window);
+    mspectr->n_points = mdata1->delay_steps;
+    mspectr->SetData(mdata1->time_profile);
+    mspectr->show();
 
 }
 

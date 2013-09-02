@@ -55,7 +55,10 @@ PBInversion::PBInversion()
 PBInversion::~PBInversion()
 {
     if(S) { gsl_matrix_free(V); gsl_matrix_free(U); gsl_vector_free(S); }
-    if(ang) for(int i=0;i<ang_size;i++) delete [] ang[i];
+    if(ang) {
+        for(int i=0;i<ang_size;i++) delete [] ang[i];
+        delete [] ang;
+    }
 }
 
 void PBInversion::run() // running a separate thread to creat basis set
@@ -127,7 +130,12 @@ void PBInversion::polar_b(double **data, double **Imrz,int xc,int yc,int dr,int 
 
 
     /* Re-initialise angular array */
-    if(ang) for(int k=0;k<ang_size;k++) delete [] ang[k];
+    if(ang) {
+        for(int k=0;k<ang_size;k++) delete [] ang[k];
+        delete [] ang;
+        ang = NULL;
+    }
+
     ang = new double *[NL];
     for(int k=0;k<NL;k++) ang[k] = new double [NR];
     for(int ki=0;ki<NL;ki++){
@@ -225,7 +233,7 @@ void PBInversion::polar_b(double **data, double **Imrz,int xc,int yc,int dr,int 
     //sprintf(work_file,"D:/Roman/Data/20130531/test2.dat");
     //save_gsl_vector(polar, work_file);
 
-    //gsl_vector_free(polar_large);
+    gsl_vector_free(polar_large);
 
     emit sent_respond( "solving svd" );
 

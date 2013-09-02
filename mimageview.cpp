@@ -194,7 +194,7 @@ void MImageView::mouseMoveEvent(QMouseEvent *event)
         //QPoint m_point(posx, posy);
         //QColor m_color(m_image->pixel(m_point));
         //sprintf(buffer,"%d, %d, %d", m_color.red(), m_color.green(), m_color.blue());
-        sprintf(buffer,"%2.2f",array_view[ posx + image_width*posy ]);
+        sprintf(buffer,"%2.2f", array_view[ posx + image_width*posy ]);
         ui->lineEdit_bincontent->setText(buffer);
     }
 

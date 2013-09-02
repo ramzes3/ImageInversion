@@ -32,6 +32,7 @@ MData::MData()
     array_2D_initial = NULL; array_2D_processed = NULL; array_2D_result = NULL;
     array_1D_spectrum = NULL; array_coeffs = NULL;
     array_2D_tot_sig = NULL; array_2D_bkg = NULL;
+    time_profile = NULL; delay_steps = 0;
 
     polar_2D_image = NULL;
     input_2d_array = NULL; output_2d_array = NULL;
@@ -48,6 +49,7 @@ MData::~MData()
     if(array_2D_tot_sig)    delete [] array_2D_tot_sig;
     if(array_2D_bkg)        delete [] array_2D_bkg;
     if(polar_2D_image)      delete [] polar_2D_image;
+    if(time_profile)        delete [] time_profile;
 
     if(input_2d_array)  for(int i=0;i<size_y;i++) delete [] input_2d_array[i];
     if(output_2d_array) for(int i=0;i<size_y;i++) delete [] output_2d_array[i];
@@ -145,7 +147,7 @@ int MData::Load_2D(char* filename, bool transpose_flag)
     }
     fclose (pFile);    
 
-    if(array_2D_result) {delete [] array_2D_result; array_2D_result = NULL;}
+    //if(array_2D_result) {delete [] array_2D_result; array_2D_result = NULL;}
    // array_2D_result = new double [size_x*size_y];
 
     return 1;
@@ -205,7 +207,7 @@ int MData::Load_binary(char* filename, int depth, int width, int height, bool tr
         }
 
 
-    if(array_2D_result) {delete [] array_2D_result; array_2D_result = NULL;}
+    //if(array_2D_result) {delete [] array_2D_result; array_2D_result = NULL;}
     //array_2D_result = new double [size_x*size_y];
 
     file.close();
@@ -214,10 +216,40 @@ int MData::Load_binary(char* filename, int depth, int width, int height, bool tr
     return 1;
 }
 
+ int MData::Load_1D(char* filename)
+ {
+     FILE* pFile; pFile = NULL;
+     char buffer;
+     float var;
+     //char buffer [100];
+     pFile = fopen (filename , "r");
+     if (pFile == NULL) {return 0;}
+
+     delay_steps = 0;
+     do {  // calculate number of rows
+       buffer = getc(pFile);
+       if ( buffer == '\n' ) delay_steps++;
+     } while (buffer != EOF);
+     rewind (pFile); // bring posistion to the beginning of the file
+
+     if(time_profile) delete [] time_profile;
+     time_profile = new double [delay_steps];
+     for(int i=0; i<delay_steps; i++){
+         fscanf(pFile, "%f", &var);
+         fscanf(pFile, "%f", &var);
+         buffer = getc(pFile);
+         time_profile[i] = (double)var;
+     }
+     return 1;
+
+ }
+
 int MData::Copy_2D_ini_to_result()
 {
     if( !array_2D_initial ) return -2;
-    if( !array_2D_result ) array_2D_result = new double [size_x*size_y];
+    if(array_2D_result) {delete [] array_2D_result; array_2D_result = NULL;}
+    array_2D_result = new double [size_x*size_y];
+
     for (int i=0;i<size_y;i++){
        for (int j=0;j<size_x;j++){
            array_2D_result[j + i*size_x] = array_2D_initial[j + i*size_x];
@@ -300,11 +332,11 @@ double MData::find_max(double* input_array, int size){
     return max;
 }
 
-void MData::normalise_2darray(double *input_array)
+void MData::normalise_2darray(double *input_array, double norm)
 {
     int size = size_x*size_y;
     double max = find_max(input_array);
-    for (int i = 0; i<size; i++){ input_array[i] = input_array[i] / max; }
+    for (int i = 0; i<size; i++){ input_array[i] = norm * input_array[i] / max; }
 }
 
 void MData::circle_mask(int xc, int yc, int radius )
@@ -440,7 +472,7 @@ void MData::copy_f_to_d(double** input_array)
     if(!input_array){return;}
     //if(!output_array){return;}
 
-    if(array_2D_result) delete [] array_2D_result;
+    if(array_2D_result) delete [] array_2D_result; array_2D_result = NULL;
     array_2D_result = new double [size_x*size_y];
 
 
@@ -454,8 +486,8 @@ void MData::copy_f_to_d(double** input_array)
 void MData::copy_pes(double** input_array)
 {
     if(!input_array) return;
-    if(array_1D_spectrum) delete [] array_1D_spectrum;
-    if(array_coeffs) delete [] array_coeffs;
+    if(array_1D_spectrum) delete [] array_1D_spectrum; array_1D_spectrum = NULL;
+    if(array_coeffs) delete [] array_coeffs; array_coeffs = NULL;
 
     array_1D_spectrum = new double [size_spectrum];
     array_coeffs = new double [size_spectrum * nL];
@@ -669,7 +701,8 @@ void MData::Get_quarter4(int x_c, int y_c)
 void MData::Symmetrise(int x_c, int y_c){
     if(!array_2D_processed) return;
     if(!array_2D_initial) return;
-    if(!array_2D_result) { array_2D_result = new double [size_x*size_y];}
+    if(array_2D_result) {delete [] array_2D_result; array_2D_result = NULL;}
+    array_2D_result = new double [size_x*size_y];
 
     if(x_c > size_x-1) return;
     if(y_c > size_y-1) return;
