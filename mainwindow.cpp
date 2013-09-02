@@ -238,7 +238,6 @@ void MainWindow::InvertImage()
     if(!invers->m_isloaded){message("can not load basex matricies"); return;}
     invers->polar_b(mdata1->input_2d_array, mdata1->output_2d_array, xc, yc, dr, nl, odd);
     //delete invers;
-    return;
     mdata1->copy_f_to_d(mdata1->output_2d_array);
     if(odd) mdata1->nL = nl;
     else mdata1->nL = nl/2;
