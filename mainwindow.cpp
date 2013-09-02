@@ -435,6 +435,8 @@ void MainWindow::Analise()
     else {message("not ok"); return;}
     sprintf(file_template,"%s", file_temp.toLatin1().data());
 
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
     if(mdata1) delete mdata1;
     mdata1 = new MData();
     mdata1->Nskip_lines = Skip_lines;
@@ -498,19 +500,24 @@ void MainWindow::Analise()
 
 
         InvertImage();
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
-
-        if(!mdata1->SavePES(filename)) {message("there is no spectrum"); }
-        if(!mdata1->SaveAng(filename)) {message("there is no angular distribution"); }
-        if(!mdata1->SaveInvMatrix(filename)) {message("there is no inverted image"); }
-        if(!mdata1->SaveProcMatrix(filename)) {message("there is no image image"); }
-
+        if(saving_flags[2])
+            if(!mdata1->SavePES(filename)) {message("there is no spectrum"); }
+        if(saving_flags[3])
+            if(!mdata1->SaveAng(filename)) {message("there is no angular distribution"); }
+        if(saving_flags[1])
+            if(!mdata1->SaveInvMatrix(filename)) {message("there is no inverted image"); }
+        if(saving_flags[0])
+            if(!mdata1->SaveProcMatrix(filename)) {message("there is no image image"); }
 
     } // main loop
     ui->progressBar->setVisible(0);
     if(mdata1) delete mdata1;
     mdata1 = NULL;
 
+    QApplication::restoreOverrideCursor();
+    return;
     //strcpy (current_folder,dirname);
 }
 
@@ -613,6 +620,8 @@ void MainWindow::SaveAll(){
 
 void MainWindow::SaveSelected(){
 
+    if(!mdata1) {message("there is no data"); return;}
+
     QFileDialog dialog(this);
     QString path = dialog.getSaveFileName(this, tr("Save File"), filename);
 
@@ -626,20 +635,20 @@ void MainWindow::SaveSelected(){
     fp >> saving_flags[5] >> saving_flags[6] >> saving_flags[7] >> saving_flags[8];
     */
 
-    if(!mdata1) {message("there is no data"); return;}
-    if (saving_flags[5]){
+    if (saving_flags[2]){
         if(!mdata1->SavePES(filesave)) {message("there is no spectrum"); }
     }
-    if (saving_flags[6]){
+    if (saving_flags[3]){
         if(!mdata1->SaveAng(filesave)) {message("there is no angular distribution"); }
     }
-    if (saving_flags[7]){
+    if (saving_flags[0]){
         if(!mdata1->SaveProcMatrix(filesave)) {message("there is no image image"); }
     }
-    if (saving_flags[8]){
+    if (saving_flags[1]){
         if(!mdata1->SaveInvMatrix(filesave)) {message("there is no inverted image"); }
     }
     message("files successfully saved");
+
 }
 
 void MainWindow::SaveImage()
@@ -883,44 +892,46 @@ void MainWindow::ConvertImages()
 {    
     if(!mdata1) {message("There is no data loaded"); return;}
     double db_var, *ptr_var;
-/*
+
     getPath();
     if(!file_status){return;}
     if (!mdata1->Load_1D(filename)) {message("cannot open file for reading"); return;}
-*/
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
     char work_dir_c[255],fileout[255], work_dir_c2[255], work_dir_c3[255], buffer[255];//, buffer[255];
 
-    sprintf(work_dir_c,"D:/Roman/Data/20130828/FirstRun");
-    sprintf(work_dir_c2,"D:/Roman/Data/20130828/SecondRun");
-    sprintf(work_dir_c3,"D:/Roman/Data/20130828/ThirdRun");
+    sprintf(work_dir_c,"D:/Roman/Data/20130829/VMIimages");
+    //sprintf(work_dir_c2,"D:/Roman/Data/20130828/SecondRun");
+    //sprintf(work_dir_c3,"D:/Roman/Data/20130828/ThirdRun");
 /*
     QStringList files = QFileDialog::getOpenFileNames(
                             this,
                             "Select one or more files to join",
                             "D:/Musor/CS2Data",
                             "Images (*.*)");
-    */
+*/
     QStringList files, files2, files3;
 
-    sprintf(fileout,"%s/CS2_VMI_1_-1500000.dat", work_dir_c);
+    sprintf(fileout,"%s/CS21000nmstep_-1500000.dat", work_dir_c);
     files << fileout;
 
-    sprintf(fileout,"%s/CS2_VMI_2_-1500000.dat", work_dir_c2);
-    files2 << fileout;
+    //sprintf(fileout,"%s/CS2_VMI_2_-1500000.dat", work_dir_c2);
+    //files2 << fileout;
 
-    sprintf(fileout,"%s/CS2_VMI_3_-1500000.dat", work_dir_c3);
-    files3 << fileout;
+    //sprintf(fileout,"%s/CS2_VMI_3_-1500000.dat", work_dir_c3);
+    //files3 << fileout;
 
-    int delay = 296000;
-    for(int i = 0; i<155;i++) {
-        sprintf(fileout,"%s/CS2_VMI_1_%d.dat", work_dir_c, delay);
+    int delay = 295000;
+    for(int i = 0; i<305;i++) {
+        sprintf(fileout,"%s/CS21000nmstep_%d.dat", work_dir_c, delay);
         files << fileout;
-        sprintf(fileout,"%s/CS2_VMI_2_%d.dat", work_dir_c2, delay);
-        files2 << fileout;
-        sprintf(fileout,"%s/CS2_VMI_3_%d.dat", work_dir_c3, delay);
-        files3 << fileout;
+        //sprintf(fileout,"%s/CS2_VMI_2_%d.dat", work_dir_c2, delay);
+        //files2 << fileout;
+        //sprintf(fileout,"%s/CS2_VMI_3_%d.dat", work_dir_c3, delay);
+        //files3 << fileout;
 
-        delay = delay + 2000;
+        delay = delay + 1000;
     }
 
 
@@ -961,7 +972,7 @@ void MainWindow::ConvertImages()
         sprintf(filename,"%s",var.data()); // get path location
         //if (!mdata1->Load_2D(filename, transpose_flag)) {message("cannot open file for reading"); continue;}
         if (!mdata1->Load_binary(filename, 32, 1024, 1024, transpose_flag)) {message("cannot open file for reading 1"); continue;}
-
+/*
         //  Adding another file
         if (!mdata1->Copy_2D_ini_to_result()){message("cannot creat result array"); continue;}
         var = files2.at(k).toLatin1(); // dir.toLatin1(); // convertion from QString to char*
@@ -978,9 +989,9 @@ void MainWindow::ConvertImages()
         if (!mdata1->Load_binary(filename, 32, 1024, 1024, transpose_flag)) {message("cannot open file for reading 2"); continue;}
         if (!mdata1->Add_result_ini_to_ini()){message("cannot creat processed array"); continue;}
         // end of the adding file
-
+*/
         // Normalise array;
-        //mdata1->normalise_2darray(mdata1->array_2D_processed, mdata1->time_profile[k]);
+        mdata1->normalise_2darray(mdata1->array_2D_processed, mdata1->time_profile[k]);
 
         sprintf(fileout,"%s_sum", filename);
         if(!mdata1->SaveProcMatrix(filename)) {message("there is no image image"); }
@@ -1000,12 +1011,15 @@ void MainWindow::ConvertImages()
         sprintf(buffer, "%s/%d", work_dir_c, k);
         SaveImage(buffer);
         */
-
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     } // main loop
 
 
     ui->progressBar->setValue(100);
     message("done");
+
+    QApplication::restoreOverrideCursor();
+    return;
 }
 
 void MainWindow::DataManipulation()
@@ -1157,7 +1171,6 @@ void MainWindow::SaveSettings()
     outFile1 << "\t" << lthickness << endl;
     outFile1 << "\t" << r << "\t" << g << "\t" << b << endl;
     //outFile1 << "\t" << PES << "\t" << ANG << "\t" << PROC << "\t" << INV << endl;
-    outFile1 << "\t" << saving_flags[5] << "\t" << saving_flags[6] << "\t" << saving_flags[7] << "\t" << saving_flags[8] << endl;
     outFile1.close();
 
     message("settings are saved");
@@ -1189,7 +1202,6 @@ void MainWindow::LoadSettings()
     fp >> lthickness;
     fp >> r >> g >> b;
     //fp >> savePES >> saveANG >> savePROC >> saveINV;
-    fp >> saving_flags[5] >> saving_flags[6] >> saving_flags[7] >> saving_flags[8];
     fp.close();
 
     color1.setRed(r); color1.setGreen(g); color1.setBlue(b);

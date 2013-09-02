@@ -48,7 +48,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>2</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -192,58 +192,6 @@
      </property>
      <property name="frame">
       <bool>false</bool>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBox_savePES">
-     <property name="geometry">
-      <rect>
-       <x>260</x>
-       <y>130</y>
-       <width>71</width>
-       <height>18</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Save PES</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBox_saveANG">
-     <property name="geometry">
-      <rect>
-       <x>260</x>
-       <y>150</y>
-       <width>71</width>
-       <height>18</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Save ANG</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBox_savePROC">
-     <property name="geometry">
-      <rect>
-       <x>260</x>
-       <y>170</y>
-       <width>71</width>
-       <height>18</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Save PROC</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBox_saveINV">
-     <property name="geometry">
-      <rect>
-       <x>260</x>
-       <y>190</y>
-       <width>71</width>
-       <height>18</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Save INV</string>
      </property>
     </widget>
    </widget>
