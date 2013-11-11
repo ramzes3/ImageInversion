@@ -275,7 +275,7 @@ void PBInversion::polar_b(double **data, double **Imrz,int xc,int yc,int dr,int 
 
     psum = 0;
     for(ir=0;ir<dr;ir++) psum += ang[0][ir]*(ir*ir); // Normalise PES
-    for(ir=0;ir<dr;ir++) ang[0][ir]*=(ir*ir)/psum; // Normalise PES  ang[0][ir]*=(ir*ir/pmax);
+    for(ir=0;ir<dr;ir++) ang[0][ir]*=(ir*ir); // psum; // Normalise PES  ang[0][ir]*=(ir*ir/pmax);
 
     /* Create cartesian image for display */
 

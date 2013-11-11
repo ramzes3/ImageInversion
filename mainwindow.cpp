@@ -157,7 +157,7 @@ void MainWindow::Load_Image_ASCII()
     //if (!mdata1->Copy_2D_ini_to_processed()){message("cannot creat processed array"); return;}
     //mdata1->normalise_2darray(mdata1->array_2D_initial);
     double max_content = mdata1->find_max(mdata1->array_2D_initial);
-    double counts = mdata1->TotalCounts(mdata1->array_2D_initial, mdata1->GetsizeX()/2, mdata1->GetsizeY()/2, mdata1->GetsizeY());
+    double counts = mdata1->TotalCounts(mdata1->array_2D_initial, mdata1->GetsizeX()/2, mdata1->GetsizeY()/2, 0);
     sprintf (buffer, "Array size: %d, %d; Counts: %4.0f", mdata1->GetsizeX(), mdata1->GetsizeY(), counts );
     message( buffer );
 
@@ -195,11 +195,16 @@ void MainWindow::Add_Image_ASCII()
     getPath();
     if(!file_status){return;}
     //if(mdata1) delete mdata1;
-    if(!mdata1) mdata1 = new MData();
+    if(!mdata1) return; //mdata1 = new MData();
     mdata1->Nskip_lines = Skip_lines;
 
     if (!mdata1->Copy_2D_ini_to_result()){message("cannot creat processed array"); return;}
-    if (!mdata1->Load_2D(filename,transpose_flag)) {message("cannot open file for reading"); return;}
+    // Load File
+    if (!mdata1->Load_2D(filename,transpose_flag)) {
+        message("cannot open ASCII file for reading");
+        if (!mdata1->Load_binary(filename, bit_depth, binary_width, binary_height, transpose_flag)) {message("cannot open file for reading"); return;}
+    }
+
     if (!mdata1->Add_result_ini_to_ini()){message("cannot creat processed array"); return;}
     //mdata1->normalise_2darray(mdata1->array_2D_initial);
     double max_content = mdata1->find_max(mdata1->array_2D_initial);
@@ -215,7 +220,7 @@ void MainWindow::Add_Image_ASCII()
 void MainWindow::InvertImage()
 {
     if(!mdata1) {message("There is no data loaded"); return;}
-    if(invers) delete invers;
+    if(invers) {delete invers; invers = NULL;}
     invers = new PBInversion();
     connect( invers, SIGNAL( sent_respond(const char*) ), this, SLOT( message(const char*)) );
     connect( invers, SIGNAL( sent_error(const char*) ), this, SLOT( merror(const char*)) );
@@ -480,7 +485,7 @@ void MainWindow::Analise()
         image_window->show();
 
         // Ciaran modifications
-        sprintf(filename,"%s/%s/inversion", work_dir_c, dirname, file_template); // inversion folder path string
+        sprintf(filename,"%s/%s/inversion", work_dir_c, dirname); // inversion folder path string
         mkdir(filename);
         sprintf(filename,"%s/%s/inversion/x%iy%i", work_dir_c, dirname, xc, yc); //output folder name
         mkdir(filename);
@@ -509,12 +514,11 @@ void MainWindow::Analise()
         if(saving_flags[1])
             if(!mdata1->SaveInvMatrix(filename)) {message("there is no inverted image"); }
         if(saving_flags[0])
-            if(!mdata1->SaveProcMatrix(filename)) {message("there is no image image"); }
+            if(!mdata1->SaveProcMatrix(filename)) {message("there is no original image"); }
 
     } // main loop
     ui->progressBar->setVisible(0);
-    if(mdata1) delete mdata1;
-    mdata1 = NULL;
+    if(mdata1) {delete mdata1;  mdata1 = NULL;}
 
     QApplication::restoreOverrideCursor();
     return;
@@ -901,9 +905,9 @@ void MainWindow::ConvertImages()
 
     char work_dir_c[255],fileout[255], work_dir_c2[255], work_dir_c3[255], buffer[255];//, buffer[255];
 
-    sprintf(work_dir_c,"D:/Roman/Data/20130829/VMIimages");
-    //sprintf(work_dir_c2,"D:/Roman/Data/20130828/SecondRun");
-    //sprintf(work_dir_c3,"D:/Roman/Data/20130828/ThirdRun");
+    sprintf(work_dir_c,"D:/Roman/Data/CS2/20131009/PhotoelectronImages/CS2_VMIs1");
+    //sprintf(work_dir_c2,"D:/Roman/Data/Furan/20130930/Electrons/VMIs2");
+    //sprintf(work_dir_c3,"D:/Roman/Data/Furan/20130930/Electrons/VMIs3");
 /*
     QStringList files = QFileDialog::getOpenFileNames(
                             this,
@@ -913,25 +917,25 @@ void MainWindow::ConvertImages()
 */
     QStringList files, files2, files3;
 
-    sprintf(fileout,"%s/CS21000nmstep_-1500000.dat", work_dir_c);
+    sprintf(fileout,"%s/CS2VMIs1_-1500000.dat", work_dir_c);
     files << fileout;
 
-    //sprintf(fileout,"%s/CS2_VMI_2_-1500000.dat", work_dir_c2);
+    //sprintf(fileout,"%s/FuranVMI_2_-1500000.dat", work_dir_c2);
     //files2 << fileout;
 
-    //sprintf(fileout,"%s/CS2_VMI_3_-1500000.dat", work_dir_c3);
+    //sprintf(fileout,"%s/FuranVMI_3_-1500000.dat", work_dir_c3);
     //files3 << fileout;
 
-    int delay = 295000;
-    for(int i = 0; i<305;i++) {
-        sprintf(fileout,"%s/CS21000nmstep_%d.dat", work_dir_c, delay);
+    int delay = -48000;
+    for(int i = 0; i<151;i++) {
+        sprintf(fileout,"%s/CS2VMIs1_%d.dat", work_dir_c, delay);
         files << fileout;
-        //sprintf(fileout,"%s/CS2_VMI_2_%d.dat", work_dir_c2, delay);
+        //sprintf(fileout,"%s/FuranVMI_2_%d.dat", work_dir_c2, delay);
         //files2 << fileout;
-        //sprintf(fileout,"%s/CS2_VMI_3_%d.dat", work_dir_c3, delay);
+        //sprintf(fileout,"%s/FuranVMI_3_%d.dat", work_dir_c3, delay);
         //files3 << fileout;
 
-        delay = delay + 1000;
+        delay = delay + 2000;
     }
 
 
@@ -986,12 +990,12 @@ void MainWindow::ConvertImages()
         var = files3.at(k).toLatin1(); // dir.toLatin1(); // convertion from QString to char*
         sprintf(filename,"%s",var.data()); // get path location
         //if (!mdata1->Load_2D(filename,transpose_flag)) {message("cannot open file for reading"); continue;}
-        if (!mdata1->Load_binary(filename, 32, 1024, 1024, transpose_flag)) {message("cannot open file for reading 2"); continue;}
+        if (!mdata1->Load_binary(filename, 32, 1024, 1024, transpose_flag)) {message("cannot open file for reading 3"); continue;}
         if (!mdata1->Add_result_ini_to_ini()){message("cannot creat processed array"); continue;}
         // end of the adding file
 */
         // Normalise array;
-        mdata1->normalise_2darray(mdata1->array_2D_processed, mdata1->time_profile[k]);
+        mdata1->normaliseToSumArray(mdata1->array_2D_processed, mdata1->time_profile[k]);
 
         sprintf(fileout,"%s_sum", filename);
         if(!mdata1->SaveProcMatrix(filename)) {message("there is no image image"); }
@@ -1125,19 +1129,78 @@ void MainWindow::Test()
 {
     getPath();
     if(!file_status){return;}
-    //if(mdata1) delete mdata1;
+    if(mdata1) {delete mdata1; mdata1 = NULL;}
     if(!mdata1) mdata1 = new MData();
 
-    if (!mdata1->Load_1D(filename)) {message("cannot open file for reading"); return;}
+    if (!mdata1->Load_2D(filename, transpose_flag)) {message("cannot open file for reading"); return;} // 0 means do not transpose the matrix
+    int index_var;
+    double *dpointer, *doutarray;
+    doutarray = new double [5*mdata1->size_y];
+/*
+    // find max intensity pixels
+    for (int i = 0; i<mdata1->size_y;i++){
+        dpointer = &mdata1->array_2D_initial[i*mdata1->size_x];
+        index_var = mdata1->find_maxi( dpointer, mdata1->size_x);
+        doutarray[i + 2*mdata1->size_y] = mdata1->array_2D_initial[i*mdata1->size_x + index_var];
+        doutarray[i + 1*mdata1->size_y] = mdata1->array_2D_initial[index_var];
+        doutarray[i] = index_var;
+    }
+*/
+    // Zig Zag formular
+    int p1, p2; p1 = 246; p2 = 386; // pixels
+    double delt, oscperiod, cdelay, fractime; delt = 13.36; oscperiod = 40;// time step and oscillation period in fs
+    for (int i = 0; i<mdata1->size_y;i++){
+        cdelay = (i-1)*delt - 186.3033333333;
+        if (cdelay < 0) cdelay =0;
+        fractime = ((int) cdelay) % 80;
+        if (fractime < 40) index_var = p2 - (p2-p1)*fractime/oscperiod;
+        else index_var = 2*p1 - p2 + (p2-p1)*fractime/oscperiod;
+        doutarray[i + 2*mdata1->size_y] = mdata1->array_2D_initial[i*mdata1->size_x + index_var];
+        doutarray[i + 1*mdata1->size_y] = mdata1->array_2D_initial[index_var];
+        doutarray[i] = index_var;
+    }
+
+    // Load beta parameters
+    getPath();
+    if(!file_status){return;}
+    if (!mdata1->Load_2D(filename, transpose_flag)) {message("cannot open file for reading"); return;} // 0 means do not transpose the matrix
+    // get averaged beta along the wavepacket propagation
+    double sum;
+    int aver = 10;
+    for (int i = 0; i<mdata1->size_y;i++ ){
+        sum = 0;
+        index_var = (int) doutarray[i];
+        for (int k =-5; k<5;k++) sum += mdata1->array_2D_initial[i*mdata1->size_x + index_var + k];
+        doutarray[i + 3*mdata1->size_y] = sum/aver;
+        sum = 0;
+        for (int k =-5; k<5;k++) sum += pow(mdata1->array_2D_initial[i*mdata1->size_x + index_var + k] - doutarray[i + 3*mdata1->size_y], 2);
+        doutarray[i + 4*mdata1->size_y] = sqrt(sum/(aver-1));
+    }
 
 
+////////////////////////// A summary file  ////////////////////////////
+    char fileout[255];
+    sprintf(fileout,"%s.%s", filename, "txt");
+    ofstream outFile1(fileout, ios::out);
+    if(!outFile1){ message("cannot create summary file"); return; }
+///////////////////////////////////////////////////////////////////////
+    for (int i = 0; i<mdata1->size_y;i++ ){
+        for (int j = 0;j<5;j++) outFile1 <<  doutarray[i + j * mdata1->size_y] <<"\t"; //
+        outFile1 <<endl;
+    }
+    outFile1.close();
+
+    delete [] doutarray;
+    //if (!mdata1->Load_1D(filename)) {message("cannot open file for reading"); return;}
+
+/*
     if(mspectr) delete mspectr;
     mspectr = new MSpectrum(this);
     mspectr->setWindowFlags(mspectr->windowFlags() | Qt::Window);
     mspectr->n_points = mdata1->delay_steps;
     mspectr->SetData(mdata1->time_profile);
     mspectr->show();
-
+*/
 }
 
 void MainWindow::MDisable()
@@ -1237,6 +1300,7 @@ void MainWindow::OptionDialog()
         if(image_window){image_window->set_circle_par(lthickness, color1);}
     }
     else message("settings cancelled");
+    SaveSettings();
 }
 
 void MainWindow::DeclareMImageView(){

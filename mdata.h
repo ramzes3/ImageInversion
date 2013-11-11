@@ -26,9 +26,11 @@ public:
 
     // Data processing functions
     void transpose();
-    void normalise_2darray( double*, double ); // normalisation on arbitrary number
+    void normalise_2darray( double*, double ); // normalisation on the maximum value in the array to an arbitrary number
+    void normaliseToSumArray( double*, double ); // normalisation on the array sum to an arbitrary number
     double find_max( double* ); // returns maximum from any double array of size = size_x*size_y
     double find_max( double*, int ); // returns maximum from any double array of any size
+    int find_maxi(double* , int ); // return index of max element
     void circle_mask( int, int, int ); // apply circle mask to the image
     void reload_data();  // copy initial data into processed data
     void Subtract_bkg(); // substrack background image

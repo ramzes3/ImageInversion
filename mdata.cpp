@@ -75,7 +75,7 @@ MData::~MData()
 int MData::Load_2D(char* filename, bool transpose_flag)
 {
     FILE* pFile; pFile = NULL;
-    int nrows, ncol;
+    int nrows, ncol, count;
     float var;
     char buffer;
     //char buffer [100];
@@ -115,10 +115,10 @@ int MData::Load_2D(char* filename, bool transpose_flag)
     else {size_x = ncol; size_y = nrows - Nskip_lines;}
 
     rewind (pFile);
-    nrows = 0;
-    while (nrows != Nskip_lines) {  // skip first Nskip_lines
+    count = 0;
+    while (count != Nskip_lines) {  // skip first Nskip_lines
       buffer = getc(pFile);
-      if ( buffer == '\n' ) nrows++;
+      if ( buffer == '\n' ) count++;
     }
 
     if(array_2D_initial) delete [] array_2D_initial;
@@ -129,13 +129,13 @@ int MData::Load_2D(char* filename, bool transpose_flag)
     for(int i=0; i<size_x*size_y; i++){ array_2D_initial[i] = 0; array_2D_processed[i] = 0;} //array_2D_processed[i] = 0;
 
     const double bkglevel = 0;
-    for (int i=0;i<size_y;i++){
-       for (int j=0;j<size_x;j++){
+    for (int i=0;i<nrows - Nskip_lines;i++){
+       for (int j=0;j<ncol;j++){
            fscanf(pFile, "%f", &var);
            buffer = getc(pFile);
            if(transpose_flag){
-               array_2D_initial[i + j*size_y] = (double)var - bkglevel;
-               array_2D_processed[i + j*size_y] = array_2D_initial[i + j*size_y];
+               array_2D_initial[i + j*size_x] = (double)var - bkglevel;
+               array_2D_processed[i + j*size_x] = array_2D_initial[i + j*size_x];
            }
            else{
 
@@ -246,7 +246,7 @@ int MData::Load_binary(char* filename, int depth, int width, int height, bool tr
 
 int MData::Copy_2D_ini_to_result()
 {
-    if( !array_2D_initial ) return -2;
+    if( !array_2D_initial ) return 0;
     if(array_2D_result) {delete [] array_2D_result; array_2D_result = NULL;}
     array_2D_result = new double [size_x*size_y];
 
@@ -261,7 +261,7 @@ int MData::Copy_2D_ini_to_result()
 
 int MData::Copy_2D_ini_to_processed()
 {    
-    if( !array_2D_initial ) return -2;
+    if( !array_2D_initial ) return 0;
     if( !array_2D_processed ) array_2D_processed = new double [size_x*size_y];
     for (int i=0;i<size_y;i++){
        for (int j=0;j<size_x;j++){
@@ -274,8 +274,8 @@ int MData::Copy_2D_ini_to_processed()
 
 int MData::Add_result_ini_to_ini()
 {
-    if( !array_2D_result ) return -1;
-    if( !array_2D_initial ) return -2;
+    if( !array_2D_result ) return 0;
+    if( !array_2D_initial ) return 0;
     for (int i=0;i<size_y;i++){
        for (int j=0;j<size_x;j++){
            array_2D_result[j + i*size_x] += array_2D_initial[j + i*size_x];
@@ -332,11 +332,27 @@ double MData::find_max(double* input_array, int size){
     return max;
 }
 
+int MData::find_maxi(double* input_array, int size){
+    double max = input_array[0];
+    int maxi = 0;
+    for (int i = 0; i<size; i++){
+        if(max < input_array[i]) {max = input_array[i]; maxi = i;}
+    }
+    return maxi;
+}
+
 void MData::normalise_2darray(double *input_array, double norm)
 {
     int size = size_x*size_y;
     double max = find_max(input_array);
     for (int i = 0; i<size; i++){ input_array[i] = norm * input_array[i] / max; }
+}
+
+void MData::normaliseToSumArray(double *input_array, double norm)
+{
+    int size = size_x*size_y;
+    double sum = TotalCounts(input_array, 0, 0, 0);
+    for (int i = 0; i<size; i++){ input_array[i] = norm * input_array[i] / sum; }
 }
 
 void MData::circle_mask(int xc, int yc, int radius )
@@ -370,12 +386,12 @@ void MData::transpose()
     }
 }
 
-double MData::TotalCounts(double *input_array, int posx, int posy, int diameter)
+double MData::TotalCounts(double *input_array, int posx, int posy, int radius)
 {
     double counts = 0;
     for (int i = 0; i<size_y; i++){
         for (int j = 0; j<size_x; j++){
-            if( sqrt( pow(j-posx,2) + pow(i-posy,2)) > diameter ) continue;
+            if (radius > 0) if( sqrt( pow(j-posx,2) + pow(i-posy,2)) > radius ) continue;
             counts += input_array[ j + i * size_x];
         }
     }
@@ -472,7 +488,7 @@ void MData::copy_f_to_d(double** input_array)
     if(!input_array){return;}
     //if(!output_array){return;}
 
-    if(array_2D_result) delete [] array_2D_result; array_2D_result = NULL;
+    if(array_2D_result) {delete [] array_2D_result; array_2D_result = NULL;}
     array_2D_result = new double [size_x*size_y];
 
 
@@ -486,8 +502,8 @@ void MData::copy_f_to_d(double** input_array)
 void MData::copy_pes(double** input_array)
 {
     if(!input_array) return;
-    if(array_1D_spectrum) delete [] array_1D_spectrum; array_1D_spectrum = NULL;
-    if(array_coeffs) delete [] array_coeffs; array_coeffs = NULL;
+    if(array_1D_spectrum) {delete [] array_1D_spectrum; array_1D_spectrum = NULL;}
+    if(array_coeffs) {delete [] array_coeffs; array_coeffs = NULL;}
 
     array_1D_spectrum = new double [size_spectrum];
     array_coeffs = new double [size_spectrum * nL];
